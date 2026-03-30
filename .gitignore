@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+sahasiApp/node_modules/
+web/node_modules/
+
+# Python
+backend/__pycache__/
+backend/venv/
+*.pyc
+
+# Expo
+sahasiApp/.expo/
+
+# OS
+.DS_Store
+*.DS_Store
+
+# IDE
+.vscode/
+
+# Env files
+.env
+.env.local
