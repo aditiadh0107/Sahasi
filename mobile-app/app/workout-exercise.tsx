@@ -21,11 +21,11 @@ import {
 } from '@/constants/workoutExercises'
 import ExerciseGif from '@/src/components/ExerciseGif'
 
-// ── Phase types ───────────────────────────────────────────────────────────────
+//  Phase types 
 
 type Phase = 'ready' | 'exercise' | 'rest' | 'complete'
 
-// ── Motivational messages per tab ─────────────────────────────────────────────
+//  Motivational messages per tab 
 
 const MOTIVATIONAL: Record<TabCategory, string> = {
   'strength':     "You're getting stronger every day!",
@@ -82,7 +82,7 @@ export default function WorkoutExerciseScreen() {
     return () => clearInterval(interval)
   }, [phase, isRunning, exercise])
 
-  // ── Timer: rest phase ─────────────────────────────────────────────────────
+  // Timer: rest phase 
 
   useEffect(() => {
     if (phase !== 'rest') return

@@ -15,7 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useProfile } from '../../contexts/ProfileContext'
-import { buildApiUrl, getFetchOptions, API_ENDPOINTS } from '@/constants/api'
+import { buildApiUrl, getFetchOptions, fetchWithTimeout, API_ENDPOINTS } from '@/constants/api'
 
 export default function AuthScreen() {
   const router = useRouter()
@@ -48,7 +48,7 @@ export default function AuthScreen() {
 
     setLoading(true)
     try {
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         buildApiUrl(API_ENDPOINTS.USERS_LOGIN),
         getFetchOptions('POST', {
           email: loginEmail.toLowerCase().trim(),
@@ -127,7 +127,7 @@ export default function AuthScreen() {
 
     setLoading(true)
     try {
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         buildApiUrl(API_ENDPOINTS.USERS_REGISTER),
         getFetchOptions('POST', {
           name: name.trim(),

@@ -1,12 +1,13 @@
 // ExerciseGif.tsx
-// Displays a 3D anatomy exercise GIF fetched from ExerciseDB.
-// Uses FastImage for smooth looping GIF playback.
-// Shows a pink placeholder while loading, gray box if fetch fails — never crashes.
+// Displays a workout exercise animation.
+// Primary: loads a GIF from ExerciseDB via expo-image (works in Expo Go).
+// Fallback: shows an animated stick-figure workout animation via WorkoutAnimation.
 
 import React, { useEffect, useRef, useState } from 'react'
-import { View, StyleSheet, ActivityIndicator } from 'react-native'
-import FastImage from 'react-native-fast-image'
+import { View, StyleSheet, Animated, Easing } from 'react-native'
+import { Image } from 'expo-image'
 import { getExerciseGifUrl } from '@/src/services/exerciseMediaService'
+import WorkoutAnimation from '@/src/components/WorkoutAnimation'
 import { T } from '@/constants/theme'
 
 interface Props {
@@ -15,8 +16,29 @@ interface Props {
   height: number
   style?: any
   borderRadius?: number
-  // 'high' for the active exercise in the workout modal, 'normal' for card thumbnails
   priority?: 'normal' | 'high'
+}
+
+// Pulsing pink shimmer while GIF is loading
+function LoadingShimmer({ width, height, borderRadius }: { width: number; height: number; borderRadius: number }) {
+  const pulse = useRef(new Animated.Value(0.5)).current
+
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1,   duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.5, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      ])
+    )
+    anim.start()
+    return () => anim.stop()
+  }, [])
+
+  return (
+    <Animated.View
+      style={{ width, height, borderRadius, backgroundColor: '#FFD6E7', opacity: pulse }}
+    />
+  )
 }
 
 export default function ExerciseGif({
@@ -48,29 +70,31 @@ export default function ExerciseGif({
     return () => { mounted.current = false }
   }, [exerciseId])
 
+  // While fetching — show pulsing shimmer
   if (loading) {
     return (
-      <View style={[{ width, height, borderRadius }, styles.placeholder, style]}>
-        <ActivityIndicator color={T.primary} size="small" />
+      <View style={[{ width, height, borderRadius }, styles.centered, style]}>
+        <LoadingShimmer width={width} height={height} borderRadius={borderRadius} />
       </View>
     )
   }
 
+  // No GIF available — show animated stick figure
   if (!gifUrl || hasError) {
-    // Silent fallback — gray box, no error message shown to user
-    return <View style={[{ width, height, borderRadius }, styles.fallback, style]} />
+    return (
+      <View style={[{ width, height, borderRadius }, styles.fallbackBg, style]}>
+        <WorkoutAnimation exerciseId={exerciseId} size={Math.min(width, height)} />
+      </View>
+    )
   }
 
+  // GIF loaded — show it with expo-image (supports GIF in Expo Go)
   return (
-    <FastImage
-      source={{
-        uri: gifUrl,
-        priority: priority === 'high'
-          ? FastImage.priority.high
-          : FastImage.priority.normal,
-      }}
+    <Image
+      source={{ uri: gifUrl }}
       style={[{ width, height, borderRadius }, style]}
-      resizeMode={FastImage.resizeMode.contain}
+      contentFit="contain"
+      priority={priority === 'high' ? 'high' : 'normal'}
       onError={() => {
         console.log('[ExerciseGif] load failed:', exerciseId)
         setHasError(true)
@@ -80,12 +104,13 @@ export default function ExerciseGif({
 }
 
 const styles = StyleSheet.create({
-  placeholder: {
-    backgroundColor: '#FFD6E7',
+  centered: {
+    overflow: 'hidden',
+  },
+  fallbackBg: {
+    backgroundColor: '#FFF0F6',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  fallback: {
-    backgroundColor: '#E0E0E0',
+    overflow: 'hidden',
   },
 })

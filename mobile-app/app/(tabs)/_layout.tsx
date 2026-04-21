@@ -2,27 +2,41 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useRouter } from 'expo-router';
-import { Pressable } from 'react-native';
-import { T } from '@/constants/theme';
+import { Pressable, Alert } from 'react-native';
+import { ColorPalette } from '@/constants/designSystem';
 
 export default function TabsLayout() {
   const { clearProfile } = useProfile();
   const router = useRouter();
 
   const handleLogout = () => {
-    clearProfile();
-    router.push('/(auth)/auth');
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout', style: 'destructive', onPress: () => {
+          clearProfile();
+          router.replace('/(auth)/auth');
+        }
+      },
+    ]);
   };
 
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: T.primary,
-        tabBarInactiveTintColor: T.muted,
+        headerShown: true,
+        headerStyle: { backgroundColor: ColorPalette.neutral.white },
+        headerTitleStyle: { color: ColorPalette.primary.pink, fontWeight: '700' },
+        headerRight: () => (
+          <Pressable onPress={handleLogout} style={{ marginRight: 16 }}>
+            <Ionicons name="log-out-outline" size={24} color={ColorPalette.neutral.gray500} />
+          </Pressable>
+        ),
+        tabBarActiveTintColor: ColorPalette.primary.pink,
+        tabBarInactiveTintColor: ColorPalette.neutral.gray500,
         tabBarStyle: {
-          backgroundColor: T.white,
-          borderTopColor: T.border,
+          backgroundColor: ColorPalette.neutral.white,
+          borderTopColor: ColorPalette.neutral.gray200,
           paddingTop: 8,
           height: 65,
         },
